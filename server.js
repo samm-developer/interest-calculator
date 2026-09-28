@@ -126,6 +126,24 @@ app.post('/api/savings', async (req, res) => {
   }
 })
 
+app.delete('/api/savings/:id', async (req, res) => {
+  try {
+    const { id } = req.params
+    const result = await pool.query(
+      'DELETE FROM interest_calculations WHERE id = $1 RETURNING *',
+      [id]
+    )
+
+    if (result.rowCount === 0) {
+      return res.status(404).json({ message: 'Saved calculation not found.' })
+    }
+
+    res.json({ success: true, deleted: result.rows[0] })
+  } catch (error) {
+    res.status(500).json({ message: error.message })
+  }
+})
+
 async function startServer() {
   await initializeDatabase()
   app.listen(port, () => {
